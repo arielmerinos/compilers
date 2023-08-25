@@ -1,6 +1,6 @@
 -- Integrantes del equipo:
 -- Merino Pena Kevin Ariel | 317031326 | @arielmerinos
--- Aquino Chapa Armando Abraham | 317058163 | @armandoAAC
+-- Aquino Chapa Armando Abraham | 317058163 | @ArmandoAAC
 -- Bonilla Ruiz Roberto Adrian
 -- García Toxqui Demian Oswaldo
 -- Cristóbal Morales Karen
@@ -60,8 +60,26 @@ subsets (x:xs) = [x:subset | subset <- remainingSubsets] ++ remainingSubsets
 -- El elemento mayoritario es el elemento que aparece más de ⌊n/2⌋ veces, donde n es la longitud de la lista. Define la
 -- función majorityElem tal que recibe una lista y devuelve su elemento mayoritario.
 -- La solución debe ser de complejidad O(n) en tiempo y O(1) en el espacio.
--- majorityElem :: Eq a => [a] -> a
+-- Ejemplo: > majorityElem [3 ,2 ,3] --> 3
+-- majorityElem [2 ,2 ,1 ,1 ,1 ,2 ,2] --> 2
+-- majorityElem [1, 2, 1, 2, 1, 2, 2] --> 2
+majorityElem :: Eq a => [a] -> a
+majorityElem [] = error "No hay elementos"
+majorityElem [x] = x
+majorityElem (x:xs) = auxMajority xs 1 x  
 
+-- Función auxiliar que se encarga de encontrar el elemento mayoritario en la lista (no vacía)
+-- La función recibe una lista, un contador (que llevará la cuenta de las incidencias del elemento) y la cabeza de la lista
+auxMajority :: Eq a => [a] -> Int -> a -> a
+auxMajority [] _ elem = elem
+auxMajority (x:xs) cont elem 
+    | x == elem  = auxMajority xs (cont + 1) elem
+    | cont == 1 = auxMajority xs 1 x
+    | otherwise = auxMajority xs (cont - 1) elem
+
+-- La solución es complejidad O(n) en tiempo porque solo recorremos una sola vez la lista. Y es complejidad O(1) en el espacio
+-- porque sólo utilizamos una variable que representa al contador y una variable que representa al candidato a ser el elemento 
+-- mayoritario en la lista, por lo cual es constante
 ----------------------------------------------------- EJERCICIO 4 ---------------------------------------------------------------
 
 -- Define la función coins tal que recibe una lista de monedas de diferentes denominaciones y una cantidad total de dinero, 
