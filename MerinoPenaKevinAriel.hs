@@ -1,9 +1,9 @@
--- Integrantes del equipo:
+-- :::::::::::::: INTEGRANTES DEL EQUIPO ::::::::::::::
 -- Merino Pena Kevin Ariel | 317031326 | @arielmerinos
 -- Aquino Chapa Armando Abraham | 317058163 | @ArmandoAAC
 -- Bonilla Ruiz Roberto Adrian
--- García Toxqui Demian Oswaldo
--- Cristóbal Morales Karen
+-- García Toxqui Demian Oswaldo | 317088296 | @DemianGT
+-- Cristóbal Morales Karen | 317180321 | @NerakCM
 
 
 ----------------------------------------------------- EJERCICIO 1 ---------------------------------------------------------------
@@ -95,9 +95,7 @@ coins (c:cs) amount
     | otherwise = coins (c:cs) (amount - c) || coins cs amount
 
 
-
--- Considera la siguiente definición de árbol binario:
-data BST a = Empty | Node a (BST a) (BST a) deriving Show
+----------------------------------------------------- EJERCICIO 5 ---------------------------------------------------------------
 
 -- Define la función isBST tal que recibe un árbol binario y devuelve si es un árbol de búsqueda binario válido. 
 -- Un BST válido se define de la siguiente manera:
@@ -105,13 +103,20 @@ data BST a = Empty | Node a (BST a) (BST a) deriving Show
 -- (b) El subárbol derecho contiene solo valores mayores que la raíz.
 -- (c) Ambos subárboles deben ser árboles de búsqueda binarios.
 
------------------------------------------------------ EJERCICIO 5 ---------------------------------------------------------------
+-- Considera la siguiente definición de árbol binario:
+data BST a = Empty | Node a ( BST a ) ( BST a ) deriving Show
 
--- isBST :: BST Int -> Bool
--- isBST (Node x Empty Empty) = True
--- isBST (Node x Empty (Node y _ _)) = x < y && isBST (Node y _ _)
--- isBST (Node x (Node y _ _) Empty) = x > y && isBST (Node y _ _)
--- isBST (Node x (Node y _ _) (Node z _ _)) = x > y && x < z && isBST (Node y _ _) && isBST (Node z _ _)
+isBST :: BST Int -> Bool
+isBST (Node root Empty Empty) = True
+isBST (Node root left right) = ((subTreeLeft root left) && (subTreeRight root right))
+
+subTreeLeft :: Int -> BST Int -> Bool
+subTreeLeft _ Empty = True
+subTreeLeft bigRoot (Node root left right) = (root < bigRoot) && (subTreeLeft bigRoot left) && (subTreeLeft bigRoot right)
+
+subTreeRight :: Int -> BST Int -> Bool
+subTreeRight _ Empty = True
+subTreeRight bigRoot (Node root left right) = (root > bigRoot) && (subTreeRight bigRoot left) && (subTreeRight bigRoot right)
 
 ----------------------------------------------------- EJERCICIO 6 ---------------------------------------------------------------
 
