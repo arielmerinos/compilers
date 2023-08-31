@@ -1,7 +1,7 @@
 -- :::::::::::::: INTEGRANTES DEL EQUIPO ::::::::::::::
 -- Merino Pena Kevin Ariel | 317031326 | @arielmerinos
 -- Aquino Chapa Armando Abraham | 317058163 | @ArmandoAAC
--- Bonilla Ruiz Roberto Adrian
+-- Bonilla Ruiz Roberto Adrian | 317219038 | @boruroad
 -- García Toxqui Demian Oswaldo | 317088296 | @DemianGT
 -- Cristóbal Morales Karen | 317180321 | @NerakCM
 
@@ -119,6 +119,16 @@ subTreeRight _ Empty = True
 subTreeRight bigRoot (Node root left right) = (root > bigRoot) && (subTreeRight bigRoot left) && (subTreeRight bigRoot right)
 
 ----------------------------------------------------- EJERCICIO 6 ---------------------------------------------------------------
-
 -- Define la función kthElem tal que recibe un árbol de búsqueda binaria y un número entero k, y devuelve el k-ésimo valor más pequeño.
--- kthElem :: BST a -> Int -> a
+-- Definimos nuestro (BST)
+data BST a = Empty | Node a (BST a) (BST a)
+
+kthElem :: BST a -> Int -> a
+kthElem tree k = case elements tree of
+    [] -> error "Árbol vacío"
+    xs -> xs !! (k - 1)
+  where
+    elements Empty = []
+    elements (Node val left right) = elements left ++ [val] ++ elements right
+
+
