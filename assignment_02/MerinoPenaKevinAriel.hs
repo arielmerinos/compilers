@@ -39,7 +39,8 @@ lexer :: String -> [Token]
 -- El análisis sintáctico consiste en determinar la estructura del programa, es decir, determina los elementos estructurales del programa 
 -- así como sus relaciones. Considera la siguiente definición de ASA y Stack:
 
-data ASA = VarASA String | NumberASA Int | BooleanASA Bool | Op Token ASA ASA deriving Show type Stack = [ASA]
+data ASA = VarASA String | NumberASA Int | BooleanASA Bool | Op Token ASA ASA deriving Show 
+type Stack = [ASA]
 
 -- 1.9 pts
 -- Define la función scannerAux que recibe una lista de tokens y un Stack, y devuelve su árbol de sintaxis abstracta correspondiente.
