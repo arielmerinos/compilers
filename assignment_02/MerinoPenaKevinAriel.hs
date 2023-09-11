@@ -7,7 +7,7 @@
 
 --- NO MODIFICAR LA FIRMA DE NINGUNA FUNCIÓN --- NO MODIFICAR LA FIRMA DE NINGUNA FUNCIÓN --- NO MODIFICAR LA FIRMA DE NINGUNA FUNCIÓN 
 
-
+import Data.Char
 
 -- Considera el siguiente lenguaje de expresiones aritméticas y booleanas con notación post-fija EAB:
 -- S ::= AExp | BExp 
@@ -24,6 +24,43 @@ data Token = Var String | Number Int | Boolean Bool | Sum | Subs | And | Or | Eq
 ----------------------------------------------------- EJERCICIO 1 ---------------------------------------------------------------
 -- :- 2 pts -: Define la función lexer que recibe una cadena del lenguaje EAB y devuelve una lista de sus tokens.
 lexer :: String -> [Token]
+lexer [] = [] 
+lexer (x:xs) 
+    | x == ' ' = lexer xs -- Caso Espacio Listo
+    | isDigit x = if stringIsDigit(newXCaseInt) == True then [Number newXToInt] ++ lexer newXsCaseInt else error "No se puede inicializar variables con digitos" 
+    | x == '+' = if length(getSubString([x]++xs)) == 1 then [Sum] ++ lexer xs else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Sum Listo
+    | x == '-' = if length(getSubString([x]++xs)) == 1 then [Subs] ++ lexer xs else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Subs Listo
+    | x == 't' = if length(getSubString([x]++xs)) == 1 then [Boolean True] ++ lexer xs else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso True Listo
+    | x == 'f' = if length(getSubString([x]++xs)) == 1 then [Boolean False] ++ lexer xs else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso False Listo
+    | x == '&' = if getSubString([x]++xs) == "&&" then [And] ++ lexer newXsCaseVar else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso And Listo 
+    | x == '|' = if getSubString([x]++xs) == "||" then [Or] ++ lexer newXsCaseVar else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Or Listo     
+    | x == '=' = if getSubString([x]++xs) == "==" then [Equal] ++ lexer newXsCaseVar else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Equal Listo
+    | otherwise = [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Variables Listo
+    where 
+        -- Caso Number
+        newXCaseInt = getSubString([x]++xs) -- La representacion a string del numero
+        newXToInt = read(newXCaseInt) -- La conversion numerica de la cadena
+        lenCaseInt = length newXCaseInt -- La longitud de la cadena procesada por getSubString
+        newXsCaseInt = drop lenCaseInt xs -- El restante de la cadena a procesar
+        -- Caso Var
+        newXCaseVar = getSubString([x]++xs)
+        lenCaseVar = length newXCaseInt -- La longitud de la cadena procesada por getSubString
+        newXsCaseVar = drop lenCaseVar xs -- El restante de la cadena a procesar
+
+
+        
+-- Corta una sucesion de una cadena hasta el proximo espacio a leer por ejemplo para "223 AB 67" solo devolveria "223"
+getSubString :: String -> String
+getSubString [] = []
+getSubString (x:xs)
+    | x /= ' ' = [x] ++ getSubString xs
+    | otherwise = []
+
+
+stringIsDigit :: String -> Bool 
+stringIsDigit [] = True
+stringIsDigit (x:xs) = if isDigit x then stringIsDigit xs else False
+
 -- { - Ejemplo -}
 -- > lexer "22␣3␣+␣var␣==␣t␣&&"
 -- > [Number 22,Number 3,Sum,Var "var",Equal,Boolean True,And]
