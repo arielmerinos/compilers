@@ -145,6 +145,26 @@ data Type = Num | Bool deriving Show
 -- es consistente. En otro caso arroja un error indicando el problema con el programa.
 
 typeCheckerAux :: ASA -> Type
+typeCheckerAux (VarASA _) = Num
+typeCheckerAux (NumberASA _) = Num
+typeCheckerAux (BooleanASA _) = Bool
+typeCheckerAux (Op token expr1 expr2) = case token of
+    And -> verificaBool expr1 expr2
+    Or -> verificaBool expr1 expr2
+    Equal -> verificaEqual expr1 expr2
+    Sum -> verificaNum expr1 expr2
+    Subs -> verificaNum expr1 expr2
+    where
+        verificaBool e1 e2 = case (typeCheckerAux e1, typeCheckerAux e2) of
+            (Bool, Bool) -> Bool
+            (x1, x2) -> error $ "El tipo de los argumentos " ++ show e1 ++ " y " ++ show e2 ++ " no son los esperados para el operador " ++ show token
+        verificaEqual e1 e2 = case (typeCheckerAux e1, typeCheckerAux e2) of
+            (Num, Num) -> Bool
+            (x1, x2) -> error $ "El tipo de los argumentos " ++ show e1 ++ " y " ++ show e2 ++ " no son los esperados para el operador " ++ show token
+        verificaNum e1 e2 = case (typeCheckerAux e1, typeCheckerAux e2) of
+            (Num, Num) -> Num
+            (x1, x2) -> error $ "El tipo de los argumentos " ++ show e1 ++ " y " ++ show e2 ++ " no son los esperados para el operador " ++ show token
+
 
 -- { - Ejemplo -}
 -- > typeCheckerAux (Op And (BooleanASA True) (Op Equal (VarASA "var") (Op Sum
@@ -157,6 +177,11 @@ typeCheckerAux :: ASA -> Type
 -- Define la función TypeChecker que recibe un ASA y devuelve dicho ASA si el tipado del programa es consistente.
 
 typeChecker :: ASA -> ASA
+typeChecker expr =
+    case typeCheckerAux expr of
+        Num -> expr
+        Bool -> expr
+        
 -- { - Ejemplo -}
 -- > typeChecker (Op And (BooleanASA True) (Op Equal (VarASA "var") (Op Sum (NumberASA
 -- 3) (NumberASA 22))))
