@@ -85,6 +85,24 @@ type Stack = [ASA]
 -- del valor parcial?
 
 scannerAux :: [Token] -> Stack -> ASA
+scannerAux [] (asa_Final:_) = asa_Final 
+scannerAux [] _ = error "Expresión mal formada."
+scannerAux (t:tokens) stack =
+    case t of
+        Var v -> scannerAux tokens (VarASA v : stack)
+        Number n -> scannerAux tokens (NumberASA n : stack)
+        Boolean b -> scannerAux tokens (BooleanASA b : stack)
+        Sum -> operacionBinaria Sum
+        Subs -> operacionBinaria Subs
+        And -> operacionBinaria And
+        Or -> operacionBinaria Or
+        Equal -> operacionBinaria Equal
+  where
+    operacionBinaria op =
+        case stack of
+            (operador1: operador2: pilaRestante) -> scannerAux tokens (Op op operador1 operador2 : pilaRestante)
+            _ -> error "Expresión mal formada."
+
 -- { - Ejemplo -}
 -- > scannerAux [Number 22,Number 3,Sum,Var "var",Equal,Boolean True,And] [] > Op And (BooleanASA True) (Op Equal (VarASA "var") (Op Sum (NumberASA 3)
 -- (NumberASA 22)))
@@ -99,6 +117,8 @@ scannerAux :: [Token] -> Stack -> ASA
 -- :- 0.1 pts -:
 -- Define la función scanner que recibe una lista de tokens y devuelve su árbol de sintaxis abstracta correspondiente.
 scanner :: [Token] -> ASA
+scanner tokens = scannerAux tokens []
+
 -- { - Ejemplo -}
 -- > scanner [Number 22,Number 3,Sum,Var "var",Equal,Boolean True,And]
 -- > Op And (BooleanASA True) (Op Equal (VarASA "var") (Op Sum (NumberASA 3)
