@@ -261,6 +261,12 @@ threeAddress :: ASA -> [ThreeAddress]
 -- Generación de Código
 -- La generación de código recibe una representación intermedia del programa y genera código en lenguaje maquina. 
 -- Considera las siguientes nemotecnias de lenguaje ensamblador.
+tokenThreeAddress :: Token -> String
+tokenThreeAddress Sum = " + "
+tokenThreeAddress Subs = " - "
+tokenThreeAddress And = " & "
+tokenThreeAddress Or = " | "
+tokenThreeAddress Equal = " == "
 
 -- Asignar el valor V en el registro R1 
 -- MOV R1 V
@@ -271,10 +277,26 @@ threeAddress :: ASA -> [ThreeAddress]
 -- OR R1 R2 R3 
 -- EQ R1 R2 R3
 
-
 -- :- 2 pts -:
 -- Define la función assembly que recibe un programa en código de tres direcciones y devuelve su traducción correspondiente a lenguaje ensamblador.
-assembly :: [ThreeAddress] -> String 
+assembly :: [ThreeAddress] -> String
+assembly prog = unlines $ map toAssembly prog
+
+toAssembly :: ThreeAddress -> String
+toAssembly (Assign t v) =
+  case v of
+    N n -> "MOV " ++ t ++ " " ++ show n
+    S s -> "MOV " ++ t ++ " " ++ s
+    B b -> "MOV " ++ t ++ " " ++ show b
+
+toAssembly (Operation t a op b) =
+  case op of
+    Sum -> "ADD " ++ t ++ " " ++ a ++ " " ++ b
+    Subs -> "SUBS " ++ t ++ " " ++ a ++ " " ++ b
+    And -> "AND " ++ t ++ " " ++ a ++ " " ++ b
+    Or -> "OR " ++ t ++ " " ++ a ++ " " ++ b
+    Equal -> "EQ " ++ t ++ " " ++ a ++ " " ++ b 
+
 -- { - Ejemplo -}
 -- > assembly ["t0" = "var","t1" = 25,"t2" = "t0" == "t1"]
 -- > MOV "t0" "var"
@@ -284,6 +306,11 @@ assembly :: [ThreeAddress] -> String
 -- > MOV "t0" 50
 -- MOV "t1" "var"
 -- EQ "t2" "t0" "t1"
+
+------------------------------------ PROBAR DE LA SIGUIENTE MANERA:
+-- let entrada = [Assign "t0" (S "var"), Assign "t1" (N 25), Operation "t2" "t0" Equal "t1"]
+-- putStr (assembly entrada)
+
 ----------------------------------------------------- EJERCICIO 7 ---------------------------------------------------------------
 -- :- 0.5 pts -:
 -- Utilizando las funciones definidas anteriormente Define la función compile que recibe un programa en AEB y devuelve su 
