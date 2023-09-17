@@ -27,39 +27,61 @@ lexer :: String -> [Token]
 lexer [] = [] 
 lexer (x:xs) 
     | x == ' ' = lexer xs -- Caso Espacio Listo
-    | isDigit x = if stringIsDigit(newXCaseInt) == True then [Number newXToInt] ++ lexer newXsCaseInt else error "No se puede inicializar variables con digitos" 
-    | x == '+' = if length(getSubString([x]++xs)) == 1 then [Sum] ++ lexer xs else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Sum Listo
-    | x == '-' = if length(getSubString([x]++xs)) == 1 then [Subs] ++ lexer xs else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Subs Listo
-    | x == 't' = if length(getSubString([x]++xs)) == 1 then [Boolean True] ++ lexer xs else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso True Listo
-    | x == 'f' = if length(getSubString([x]++xs)) == 1 then [Boolean False] ++ lexer xs else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso False Listo
-    | x == '&' = if getSubString([x]++xs) == "&&" then [And] ++ lexer newXsCaseVar else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso And Listo 
-    | x == '|' = if getSubString([x]++xs) == "||" then [Or] ++ lexer newXsCaseVar else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Or Listo     
-    | x == '=' = if getSubString([x]++xs) == "==" then [Equal] ++ lexer newXsCaseVar else [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Equal Listo
-    | otherwise = [Var newXCaseVar] ++ lexer newXsCaseVar -- Caso Variables Listo
-    where 
-        -- Caso Number
-        newXCaseInt = getSubString([x]++xs) -- La representacion a string del numero
-        newXToInt = read(newXCaseInt) -- La conversion numerica de la cadena
-        lenCaseInt = length newXCaseInt -- La longitud de la cadena procesada por getSubString
-        newXsCaseInt = drop lenCaseInt xs -- El restante de la cadena a procesar
-        -- Caso Var
-        newXCaseVar = getSubString([x]++xs)
-        lenCaseVar = length newXCaseInt -- La longitud de la cadena procesada por getSubString
-        newXsCaseVar = drop lenCaseVar xs -- El restante de la cadena a procesar
+    | x == '+' = [Sum] ++ lexer xs -- Caso Sum Listo
+    | x == '-' = [Subs] ++ lexer xs -- Caso Subs Listo
+    | x == '&' = if length (filter (== '&') (getSubAnd([x]++xs) 0 '&')) == 2 then [And] ++ lexer (drop (length (getSubAnd([x]++xs) 0 '&')) ([x]++xs)) else error "And suelto" -- Caso And Listo
+    | x == '|' = if length (filter (== '|') (getSubOr([x]++xs) 0 '|')) == 2 then [Or] ++ lexer (drop (length (getSubOr([x]++xs) 0 '|')) ([x]++xs)) else error "Or suelto" -- Caso Or Listo
+    | x == '=' = if length (filter (== '=') (getSubEqual([x]++xs) 0 '=')) == 2 then [Equal] ++ lexer (drop (length (getSubEqual([x]++xs) 0 '=')) ([x]++xs)) else error "Equal suelto" -- Caso Equal Listo
+    | isDigit x = [Number digito] ++ lexer (drop(length(cadenaNumerica)) ([x]++xs))
+    | x == 'f' = if length (filter (== 'f') (variable)) == 1 && isVoidString (getTail variable) then [Boolean False] ++ lexer (drop (length variable) ([x]++xs)) else [Var variable] ++ lexer (drop (length variable) ([x]++xs))
+    | x == 't' = if length (filter (== 't') (variable)) == 1 && isVoidString (getTail variable) then [Boolean True] ++ lexer (drop (length variable) ([x]++xs)) else [Var variable] ++ lexer (drop (length variable) ([x]++xs))
+    | isAlpha x = [Var variable] ++ lexer (drop(length(variable)) ([x]++xs))
+    where
+        cadenaNumerica = getSubNum([x]++xs)
+        digito = read(cadenaNumerica)
+        variable = getSubString(([x]++xs))
 
 
-        
--- Corta una sucesion de una cadena hasta el proximo espacio a leer por ejemplo para "223 AB 67" solo devolveria "223"
+getSubAnd :: String -> Int -> Char -> String
+getSubAnd x 2 _ = []
+getSubAnd (x:xs) i '&'
+    | x == '&' && i/= 2 = [x] ++ getSubAnd xs (i+1) '&'
+    | x == ' ' && i/= 2 = [x] ++ getSubAnd xs i '&'
+    | otherwise = []
+
+getSubOr :: String -> Int -> Char -> String
+getSubOr x 2 _ = []
+getSubOr (x:xs) i '|'
+    | x == '|' && i/= 2 = [x] ++ getSubOr xs (i+1) '|'
+    | x == ' ' && i/= 2 = [x] ++ getSubOr xs i '|'
+    | otherwise = []
+
+getSubEqual :: String -> Int -> Char -> String
+getSubEqual x 2 _ = []
+getSubEqual (x:xs) i '='
+    | x == '=' && i/= 2 = [x] ++ getSubEqual xs (i+1) '='
+    | x == ' ' && i/= 2 = [x] ++ getSubEqual xs i '='
+    | otherwise = []
+
+getSubNum :: String -> String
+getSubNum [] = []
+getSubNum (x:xs)
+    | x /= ' ' && isDigit x = [x] ++ getSubNum xs
+    | otherwise = []
+
 getSubString :: String -> String
 getSubString [] = []
 getSubString (x:xs)
-    | x /= ' ' = [x] ++ getSubString xs
+    | x /= ' ' && isAlpha x = [x] ++ getSubString xs
     | otherwise = []
 
+isVoidString :: String -> Bool
+isVoidString [] = True
+isVoidString (x:xs) = if isAlpha x then False else isVoidString xs
 
-stringIsDigit :: String -> Bool 
-stringIsDigit [] = True
-stringIsDigit (x:xs) = if isDigit x then stringIsDigit xs else False
+getTail :: String -> String
+getTail [] = []
+getTail (x:xs) = xs
 
 -- { - Ejemplo -}
 -- > lexer "22␣3␣+␣var␣==␣t␣&&"
