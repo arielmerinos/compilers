@@ -8,6 +8,7 @@
 --- NO MODIFICAR LA FIRMA DE NINGUNA FUNCIÓN --- NO MODIFICAR LA FIRMA DE NINGUNA FUNCIÓN --- NO MODIFICAR LA FIRMA DE NINGUNA FUNCIÓN 
 
 import Data.Char
+import Data.List
 
 -- Considera el siguiente lenguaje de expresiones aritméticas y booleanas con notación post-fija EAB:
 -- S ::= AExp | BExp 
@@ -222,9 +223,26 @@ typeChecker expr =
 -- Define la función constantFolding que recibe un ASA y devuelve el ASA resultante de aplicarle plegado contante.
 
 constantFolding :: ASA -> ASA
+constantFolding (Op And (BooleanASA True) der) = constantFolding der
+constantFolding (Op And izq (BooleanASA True)) = constantFolding izq
+constantFolding (Op Or (BooleanASA False) der) = constantFolding der
+constantFolding (Op Or izq (BooleanASA False)) = constantFolding izq
+constantFolding (Op op izq der) =
+  let
+    foldIzq = constantFolding izq
+    foldDer = constantFolding der
+  in
+    case (op, foldIzq, foldDer) of
+      (Sum, NumberASA a, NumberASA b) -> NumberASA (a + b)
+      (Subs, NumberASA a, NumberASA b) -> NumberASA (a - b)
+      (And, BooleanASA a, BooleanASA b) -> BooleanASA (a && b)
+      (Or, BooleanASA a, BooleanASA b) -> BooleanASA (a || b)
+      (Equal, NumberASA x, NumberASA y) -> BooleanASA (x == y)
+      _ -> Op op foldIzq foldDer
+constantFolding atomico = atomico
 -- { - Ejemplo -}
--- > constantFolding (Op And (BooleanASA True) (Op Equal (VarASA "var") (Op Sum
--- (NumberASA 3) (NumberASA 22))))
+-- { - Ejemplo -}
+-- > constantFolding (Op And (BooleanASA True) (Op Equal (VarASA "var") (Op Sum (NumberASA 3) (NumberASA 22))))
 -- > Op Equal (VarASA "var") (NumberASA 25)
 -- > constantFolding (Op And (Op Equal (VarASA "var") (VarASA "var")) (Op Equal (VarASA "var") (Op Sum (VarASA "var") (NumberASA 22))))
 -- > Op And (Op Equal (VarASA "var") (VarASA "var")) (Op Equal (VarASA "var") (Op Sum (VarASA "var") (NumberASA 22)))
@@ -242,12 +260,19 @@ instance Show Value where
     show (S s) = show s
 data ThreeAddress = Assign String Value| Operation String String Token String 
 instance Show ThreeAddress where
-    show (Assign t v) = show t ++ "␣=␣" ++ show v
-    show (Operation t a op b) = show t ++ "␣=␣" ++ show a ++ tokenThreeAddress op ++ show b
+    show (Assign t v) = show t ++ " = " ++ show v
+    show (Operation t a op b) = show t ++ " = " ++ show a ++ tokenThreeAddress op ++ show b
 
 -- :- 0.2 pts -: 
 -- Define la función fresh que recibe una lista de enteros y devuelve el menor natural posible que no este en la lista.
 fresh :: [Int] -> Int 
+fresh l = freshAux  (sort l) 0 -- Si no ordenamos la lista y ponemos una lista descendente no obtendremos el número deseado
+  where                        -- Por ejemplo fresh [2, 1, 0] = 1 (si no la ordenamos)  
+    freshAux :: [Int] -> Int -> Int
+    freshAux [] n = n
+    freshAux (x:xs) n
+      | x == n = freshAux xs (n + 1)
+      | otherwise =  freshAux xs n
 -- { - Ejemplo -}
 -- > fresh [1 ,2 ,3]
 -- > 0
@@ -261,6 +286,28 @@ fresh :: [Int] -> Int
 -- resultado actual y los enteros que se han usado para variables temporales.
 
 threeAddressAux :: ASA -> [Int] -> ([ThreeAddress],String,[Int]) 
+threeAddressAux (VarASA v) ts = (c', temp, i:ts)
+   where
+      i = fresh ts
+      temp = "t" ++ show i
+      c' = [Assign temp (S v)]
+threeAddressAux (NumberASA n) ts = (c', temp, i:ts)
+   where
+      i = fresh ts
+      temp = "t" ++ show i
+      c' = [Assign temp (N n)]
+threeAddressAux (BooleanASA b) ts = (c', temp, i:ts)
+   where
+      i = fresh ts
+      temp = "t" ++ show i
+      c' = [Assign temp (B b)] 
+threeAddressAux (Op op a b) ts = (a' ++ b' ++ c', temp, i:bs)
+   where
+      (a', adA, as) = threeAddressAux a ts
+      (b', adB, bs) = threeAddressAux b as
+      i = fresh bs
+      temp =  "t" ++ show i
+      c' = [Operation temp adA op adB]
 -- { - Ejemplo -}
 -- > threeAddressAux (Op Equal (VarASA "var") (NumberASA 25)) []
 -- > (["t0" = "var","t1" = 25,"t2" = "t0" == "t1"],"t2",[2,1,0])
@@ -269,6 +316,8 @@ threeAddressAux :: ASA -> [Int] -> ([ThreeAddress],String,[Int])
 -- :- 0.1 pts -:
 -- Define la función threeAddress que recibe un ASA y devuelve su traducción correspondiente en código de tres direcciones.
 threeAddress :: ASA -> [ThreeAddress]
+threeAddress asa = trad
+   where (trad, temp, ts) = threeAddressAux asa []
 -- { - Ejemplo -}
 -- > threeAddress (Op Equal (VarASA "var") (NumberASA 25)) > ["t0" = "var","t1" = 25,"t2" = "t0" == "t1"]
 -- > threeAddress (Op Equal (NumberASA 50) (VarASA "var")) > ["t0" = 50,"t1" = "var","t2" = "t0" == "t1"]
@@ -337,7 +386,7 @@ toAssembly (Operation t a op b) =
 -- :- 0.5 pts -:
 -- Utilizando las funciones definidas anteriormente Define la función compile que recibe un programa en AEB y devuelve su 
 -- traducción correspondiente a lenguaje ensamblador.
-compile :: String -> String 
+--compile :: String -> String 
 -- { - Ejemplo -}
 -- > compile "22␣3␣+␣var␣==␣t␣&&"
 -- > MOV "t0" "var"
