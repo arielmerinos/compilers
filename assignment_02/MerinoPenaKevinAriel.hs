@@ -132,11 +132,6 @@ scannerAux (t:tokens) stack =
 -- > scannerAux [Number 22,Sum,Var "var",Var "var",Boolean False,Boolean True ,Equal ,And] []
 -- > Expresion mal formada.
 
--- Tenemos un stack y por eso decidimos usar la notación polaca inversa
--- Al final hacemos pop y regresamos el valor de la función, en lugar de ir evaluando la función, vamos a ir formando el árbol
--- Para las operaciones vamos a necesitar el token (la operación que se está evaluando y sus hijos)
-
-
 -- :- 0.1 pts -:
 -- Define la función scanner que recibe una lista de tokens y devuelve su árbol de sintaxis abstracta correspondiente.
 scanner :: [Token] -> ASA
@@ -148,13 +143,6 @@ scanner tokens = scannerAux tokens []
 -- (NumberASA 22)))
 -- > scanner [Number 22,Sum,Var "var",Var "var",Boolean False,Boolean True,Equal,And] > Expresion mal formada.
 
-
--- Se busca que sea muy limpio el código, que sea muy legible, que se entienda muy bien
--- Regresa el ASA generado
--- Sí estamos usando un manejo explícito de errores
--- Basta con que identifique que la ex. está mal formada
-
--- error era parser y no scanner pero hubo un error
 ----------------------------------------------------- EJERCICIO 3 ---------------------------------------------------------------
 
 -- Análisis Semántico
