@@ -7,7 +7,7 @@
 -- ¿Cómo correr el código?
 -- Instalar la herramienta alex
 -- alex AlexLexer.x -o Lexer.hs 
--- ghci Lexer.hs   Así es cómo lo corrió el profe (un poco diferente a cómo viene en el ejemplo de la documentación)
+-- ghci Lexer.hs 
 -- Ejemplo: > lexer " L2 :=1;  L3 :=0;  while  -( L2 = L2 )  do  L2 := L2 +1;  L3 := L3 +1 "      
 -- > [Loc 2,Assign,Number 1,Seq,Loc 3,Assign,Number 0,Seq,While,Not,LP,Loc 2,Equal,Loc 2,RP,Do,Loc 2,Assign,Loc 2,Sum,Number 1,Seq,Loc 3,Assign,Loc 3,Sum,Number 1]
 
