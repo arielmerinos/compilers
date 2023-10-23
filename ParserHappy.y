@@ -11,8 +11,9 @@
 -- happy ParserHappy.y -o Parser.hs 
 -- ghci Parser.hs 
 -- Ejemplos:
--- main ENTER (Presionar)
---L2 :=1; L3 :=0; while - L2 = L2  do L2 := (L2 + 1); L3 := (L3 + 1)  (Repetir el paso de arriba para probar otro ejemplo)
+-- Escribir "main" (sin comillas) y después presionar ENTER
+-- Posterior a ello proceder con el ejemplo:
+-- L2 :=1; L3 :=0; while - L2 = L2  do L2 := (L2 + 1); L3 := (L3 + 1)  (Repetir el paso de arriba para probar otro ejemplo)
 -- if  -true & false then skip else skip  
 {
 module Main where
