@@ -12,7 +12,7 @@
 -- 1) ghci (desde terminal)
 -- 2) :load <NombrDeleArchivo>.hs
 -- 3) (Ingresar ejemplo) 
-    -- parserAux [ Loc 2 , Assign , Number 1 , Seq , Loc 3 , Assign , Number 0 , Seq , While , Not , Loc
+    -- parser [Loc 1, Assign, Number 2, Seq, Loc 2, Assign, Number 3, Skip]
 
 -- Considera el siguiente sublenguaje conocido como WHILE:
 -- Comp C::= C';C |C'
@@ -21,6 +21,7 @@
 -- B'::= true | false | E = E | - (B)
 -- Arith E:: = E' + E | E'
 -- E' ::= L | n
+import Debug.Trace (trace)
 
 
 -- Considera la definición de Tokens de la practica 3 y la siguiente definiciones:
@@ -44,20 +45,40 @@ type Symbols = [ Content ]
         -- Seq, entonces el parser empuja el estado Q 0 y el estado Q 4 en la pila de estados.
 -- El parser continúa de esta manera hasta que encuentra el token Skip en  Q 6. Si esto ocurre, entonces el parser devuelve True. De lo contrario, el parser devuelve False.
 
+-- Nuestro parse LR(1) adhoc para WHILE (sublenjuage)
+-- Toma como entrada una lista de tokens, una pila de estados y una pila de símbolos
+-- y devuelve verdadero si y solo si la lista de tokens pertenece al lenguaje.
+
 parserAux :: Input -> Stack -> Symbols -> Bool
 parserAux [] [Q q] [] = True
 parserAux [] _ _ = False
 parserAux (t:ts) (q:qs) syms =
+  trace ("Token: " ++ show t ++ ", State: " ++ show q ++ ", Stack: " ++ show qs ++ ", Symbols: " ++ show syms) $
   case (q, t) of
     (Q 0, Loc l) -> parserAux ts (Q 1 : qs) (T (Loc l) : syms)
-    (Q 1, Assign) -> parserAux ts (Q 2 : qs) (Assign : syms)
-    (Q 2, Number n) -> parserAux ts (Q 3 : qs) (Number n : syms)
-    (Q 3, Seq) -> parserAux ts (Q 0 : Q 4 : qs) syms
+    (Q 1, Assign) -> parserAux ts (Q 2 : qs) (T Assign : syms)
+    (Q 2, Number n) -> parserAux ts (Q 3 : qs) (T (Number n) : syms)
+    (Q 3, Seq) -> 
+        if length syms >= 3 then
+            parserAux ts (Q 0 : Q 4 : qs) (drop 3 syms)
+        else
+            False
+    (Q 3, Skip) ->
+        if length syms >= 3 then
+            parserAux ts qs (drop 3 syms)
+        else
+            False
     (Q 4, Loc l) -> parserAux ts (Q 5 : qs) (T (Loc l) : syms)
-    (Q 5, Assign) -> parserAux ts (Q 6 : qs) (Assign : syms)
-    (Q 6, Number n) -> parserAux ts qs (Number n : syms)
-    (Q 6, Skip) -> parserAux ts qs syms
-    (q, _) -> False
+    (Q 5, Assign) -> parserAux ts (Q 6 : qs) (T Assign : syms)
+    (Q 6, Skip) -> 
+        if length syms >= 3 then
+            parserAux ts qs (drop 3 syms)
+        else
+            null ts && null syms
+    (_, _) -> False
+
+
+
 
 
 -- 0.1 pts Utilizando la función parserAux, define la función parser que recibe una lista de tokens WHILE y devuelve
