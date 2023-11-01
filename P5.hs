@@ -21,7 +21,7 @@
 -- B'::= true | false | E = E | - (B)
 -- Arith E:: = E' + E | E'
 -- E' ::= L | n
-import Debug.Trace (trace)
+
 
 
 -- Considera la definición de Tokens de la practica 3 y la siguiente definiciones:
