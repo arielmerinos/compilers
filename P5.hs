@@ -8,12 +8,6 @@
 -- García Toxqui Demian Oswaldo | 317088296 | @DemianGT
 -- Merino Pena Kevin Ariel | 317031326 | @arielmerinos
 
--- ************************ Pasos para probar: ******************************
--- 1) ghci (desde terminal)
--- 2) :load <NombrDeleArchivo>.hs
--- 3) (Ingresar ejemplo) 
-    -- parser [Loc 1, Assign, Number 2, Seq, Loc 2, Assign, Number 3, Skip]
-
 -- Considera el siguiente sublenguaje conocido como WHILE:
 -- Comp C::= C';C |C'
 -- C'::= L:= E | skip
@@ -21,7 +15,6 @@
 -- B'::= true | false | E = E | - (B)
 -- Arith E:: = E' + E | E'
 -- E' ::= L | n
-
 
 
 -- Considera la definición de Tokens de la practica 3 y la siguiente definiciones:
@@ -32,6 +25,20 @@ data State = Q Int deriving Show
 type Input = [Token]
 type Stack = [State]
 type Symbols = [Content]
+
+-- ************************ Pasos para probar: ******************************
+-- 1) ghci <Archivo.hs> (desde terminal)
+
+-- Ejemplos: 
+-- 1) parserAux [ Loc 2 , Assign , Number 1 , Seq , Loc 3 , Assign , Number 0 , Seq , While , Not , Loc 2 , Equal , Loc 2 , Do , Loc 2 , Assign, LP , Loc 2 , Sum , Number 1 , Seq , Loc 3 , Assign , LP , Loc 3 , Sum , Number 1] [Q 0] [] 
+
+-- 2) parserAux [ Loc 1 , Assign , Number 1 , Seq , Loc 2 , Assign , Number 2 , Seq , Skip ] [Q 0] []
+
+-- 3) parser [ Loc 2 , Assign , Number 1 , Seq , Loc 3 , Assign , Number 0 , Seq , While , Not , Loc 2 , Equal , Loc 2 , Do , Loc 2 , Assign, LP , Loc 2 , Sum , Number 1 , Seq , Loc 3 , Assign , LP , Loc 3 , Sum , Number 1]
+
+-- 4) parser [ Loc 1 , Assign , Number 1 , Seq , Loc 2 , Assign , Number 2 , Seq , Skip ]
+
+
 
 ----------------------------------------------------- EJERCICIO 1 ---------------------------------------------------------------
 -- 9.9 pts Define la función parserAux que recibe una lista de tokens, el stack de estados y símbolos, y devuelve verdadero si
@@ -47,11 +54,8 @@ parserAux (rest) (Q 1 : stack) (C : symbols) = parserAux rest stack symbols
 parserAux _ _ _ = False
 
 
-
-
 -- 0.1 pts Utilizando la función parserAux, define la función parser que recibe una lista de tokens WHILE y devuelve
 -- verdadero si y solo si la lista de tokens pertenece al lenguaje.
 parser :: Input -> Bool
 parser tokens = parserAux tokens [Q 0] []
-
 
