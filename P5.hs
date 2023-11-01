@@ -38,7 +38,13 @@ type Symbols = [Content]
 -- y solo si la lista de tokens pertenece al lenguaje con los stacks actuales. Esta función es un parser LR(1) ad hoc del lenguaje.
 
 parserAux :: Input -> Stack -> Symbols -> Bool
-
+parserAux [] (Q 0 : _) [] = True
+parserAux (Loc _ : rest) stack symbols = parserAux rest (Q 0 : stack) (S : symbols)
+parserAux (Assign : Number _ : Seq : rest) (Q 0 : stack) (S : symbols) = parserAux rest (Q 1 : Q 0 : stack) (C : symbols)
+parserAux (Skip : rest) (Q 0 : stack) (C : symbols) | null symbols = parserAux rest (Q 0 : stack) symbols
+parserAux (Skip : rest) (Q 0 : stack) (C : symbols) = parserAux rest (Q 0 : stack) (tail symbols)
+parserAux (rest) (Q 1 : stack) (C : symbols) = parserAux rest stack symbols
+parserAux _ _ _ = False
 
 
 
@@ -46,4 +52,6 @@ parserAux :: Input -> Stack -> Symbols -> Bool
 -- 0.1 pts Utilizando la función parserAux, define la función parser que recibe una lista de tokens WHILE y devuelve
 -- verdadero si y solo si la lista de tokens pertenece al lenguaje.
 parser :: Input -> Bool
+parser tokens = parserAux tokens [Q 0] []
+
 
